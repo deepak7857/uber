@@ -1,17 +1,40 @@
-import React, { useState } from 'react'
-import {Link} from 'react-router-dom'
+import React, { useState,useContext } from 'react'
+import {Link,useNavigate} from 'react-router-dom'
+import axios from 'axios';
+import {CaptainDataContext} from '../context/CaptainContext'
+import UberLogo from '../assets/Uber_logo.png';
 
-function CaptainLogin() {
+const CaptainLogin=()=> {
 
     const [email,setEmail]=useState('');
     const [Password,setPassword]=useState('');
-    const [captaindata,setCaptaindata]=useState('');
-    const handleSubmit=(e)=>{
+      const { captain,setCaptain } = React.useContext(CaptainDataContext)
+      const navigate = useNavigate()
+      const [errorMessage, setErrorMessage] = useState('');
+    const handleSubmit= async(e)=>{
       e.preventDefault();
-      const captaindata={
+      const captain={
         email:email,
         password:Password
       }
+        const response= await axios.post(`${import.meta.env.VITE_API_URL}/captain/login`,captain);
+       console.log(response);
+        if(response.status===200){
+          const data=response.data
+          setCaptain(data.captain);
+
+          localStorage.setItem('token',data.token)
+          navigate('/captain/home')
+        }
+        if (response.status === 401) {
+          setErrorMessage('Invalid credentials. Please check your username or password.');
+        } else if (!response.ok) {
+          setErrorMessage('An error occurred. Please try again later.');
+        } else {
+          
+          setErrorMessage(''); 
+          console.log('Login successful!');
+        }
      
       setPassword('');
       setEmail('');
@@ -20,7 +43,7 @@ function CaptainLogin() {
   return( 
   <div className='p-7 h-screen flex flex-col justify-between'>
   <div>
-  <img className='w-20 mb-5' src="https://www.logo.wine/a/logo/Uber/Uber-Logo.wine.svg" alt="" />
+  <img className='w-20 mb-5' src={UberLogo} alt="" />
   <form onSubmit={(e)=>{
     
     handleSubmit(e);

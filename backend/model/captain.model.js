@@ -51,7 +51,7 @@ match:[ /^\S+@\S+\.\S+$/, 'Please enter a valid email' ]
       vehicleType:{
         type:String,
         required:true,
-        enum:['car','motorcycle','auto','cab']
+        enum:['car','motorcycle','auto']
       },
       location:{
         itd:{
@@ -66,10 +66,6 @@ match:[ /^\S+@\S+\.\S+$/, 'Please enter a valid email' ]
 
 );
 
-// captainSchema.methods.generateAuthToken=function(){
-//   const token=jwt.sign({_id:this._id}, process.env.JWT_SECRET,{expiresIn:'24h'});
-//   return token;
-// };
 
 captainSchema.methods.generateAuthToken = function() {
   const token = jwt.sign({ _id: this._id }, process.env.JWT_SECRET, { expiresIn: '24h' });

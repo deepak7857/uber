@@ -1,26 +1,51 @@
-import React, { useState } from 'react'
+import React, { useState,useContext } from 'react'
 import {Link} from 'react-router-dom'
+import { UserDataContext } from '../context/userContext';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import UberLogo from '../assets/Uber_logo.png';
 
-function UserLogin() {
+
+const UserLogin=  ()=> {
   const [email,setEmail]=useState('');
   const [Password,setPassword]=useState('');
   const [userdata,setUserdata]=useState('');
-  const handleSubmit=(e)=>{
+  const { user, setUser } = useContext(UserDataContext)
+  const [errorMessage, setErrorMessage] = useState('');
+  const navigate = useNavigate()
+
+  const handleSubmit= async(e)=>{
     e.preventDefault();
-    const userdata={
+    const userData={
       email:email,
       password:Password
     }
-    
+    const response = await axios.post(`${import.meta.env.VITE_API_URL}/users/login`, userData);
+    if (response.status === 200) {
+      const data = response.data
+      setUser(data.user)
+      localStorage.setItem('token', data.token)
+      navigate('/user/home')
+    }
+    if (response.status === 401) {
+      setErrorMessage('Invalid credentials. Please check your username or password.');
+    } else if (!response.ok) {
+      setErrorMessage('An error occurred. Please try again later.');
+    } else {
+     
+      setErrorMessage(''); 
+      console.log('Login successful!');
+    }
     setPassword('');
     setEmail('');
+    setErrorMessage('');
 
     
   }
   return (
     <div className='p-7 h-screen flex flex-col justify-between'>
       <div>
-      <img className='w-20 mb-5' src="https://www.logo.wine/a/logo/Uber/Uber-Logo.wine.svg" alt="" />
+      <img className='w-16  left-5 top-5 mb-5' src={UberLogo} alt="" />
       <form onSubmit={(e)=>{
         
         handleSubmit(e);
@@ -47,7 +72,9 @@ function UserLogin() {
          <button
             className='bg-[#111] text-white font-semibold mb-3 rounded-full px-4 py-2  w-full text-lg placeholder:text-base'
           >Login</button>
+          
       </form>
+      {errorMessage && <p className="text-red-500">{errorMessage}</p>}
       <p className='text-center'>New here? <Link to='/user/signup' className='text-blue-600'>Create new Account</Link></p>
      
       </div>
